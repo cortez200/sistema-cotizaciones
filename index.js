@@ -1,3 +1,4 @@
+process.env.TZ = 'America/Lima'; // Fuerza la zona horaria de Perú en el servidor
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -25,7 +26,7 @@ app.post('/guardar', (req, res) => {
         contadorData = JSON.parse(fs.readFileSync(contadorPath, 'utf-8'));
     }
     contadorData.ultimoNumero += 1;
-    const numeroReal = contadorData.ultimoNumero; // Número para el header
+    const numeroReal = contadorData.ultimoNumero; 
     const numeroFormateado = String(numeroReal).padStart(8, '0');
     datos.numeroCorrelativo = `0001- ${numeroFormateado}`;
     fs.writeFileSync(contadorPath, JSON.stringify(contadorData));
@@ -39,6 +40,15 @@ app.post('/guardar', (req, res) => {
     datos.igvCalculado = igv.toFixed(2);
     datos.totalCalculado = totalFinal.toFixed(2);
 
+    // Ajuste de fecha para el PDF (Hora Perú)
+    datos.fechaPeru = new Date().toLocaleDateString('es-PE', { 
+        weekday: 'long', 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric',
+        timeZone: 'America/Lima' 
+    });
+
     ejs.renderFile(path.join(__dirname, 'views', 'plantilla-pdf.ejs'), { datos }, (err, html) => {
         if (err) return res.status(500).send("Error en el diseño");
 
@@ -48,7 +58,6 @@ app.post('/guardar', (req, res) => {
         };
 
         pdf.generatePdf({ content: html }, options).then(pdfBuffer => {
-            // AGREGADO: Enviar el número real en el header para sincronizar con el nombre del archivo
             res.setHeader('X-Numero-Cotizacion', numeroReal);
             res.contentType("application/pdf");
             res.send(pdfBuffer); 

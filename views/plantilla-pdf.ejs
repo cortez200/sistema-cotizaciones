@@ -42,9 +42,8 @@
         .datos-cliente { margin-bottom: 20px; font-weight: bold; margin-top: 20px; }
         .dato-fila { margin-bottom: 3px; }
 
-        /* --- INTRODUCCIÓN CORREGIDA --- */
         .introduccion { margin-bottom: 20px; }
-        .introduccion .block { display: block; margin-bottom: 2px; } /* Usamos clase para forzar saltos */
+        .introduccion .block { display: block; margin-bottom: 2px; } 
 
         table.items-table { 
             width: 100%; 
@@ -60,18 +59,17 @@
         table.items-table td { 
             border: 2px solid #000; 
             padding: 12px 8px; 
-            text-align: center; /* V. VENTA centrado */
+            text-align: center; 
         }
         .text-left { text-align: left !important; padding-left: 15px !important; }
         
-        /* --- ESTILOS TOTALES CORREGIDOS --- */
         .fila-final td { font-weight: bold; }
         .label-total-pegada { 
-            text-align: right !important; /* Alineado a la derecha */
-            padding-right: 5px !important; /* Pegado a la casilla del número */
+            text-align: right !important; 
+            padding-right: 5px !important; 
         }
         .celda-monto {
-            text-align: center !important; /* Número en el medio */
+            text-align: center !important; 
             width: 20%;
         }
     </style>
@@ -81,7 +79,7 @@
         <div class="header-left">
             <div class="header-title">GRASS DOÑA ALCIRA</div>
             <div class="fecha">
-                <%= new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %>
+                <%= datos.fechaPeru %>
             </div>
         </div>
         <div class="header-right">
