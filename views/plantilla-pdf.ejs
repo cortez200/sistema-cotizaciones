@@ -8,47 +8,89 @@
             font-size: 14px; 
             color: #000; 
             margin: 0; 
-            padding: 50px 40px; /* Más espacio arriba y a los lados */
+            padding: 40px 50px; 
             line-height: 1.4;
         }
-        .header-title { font-weight: bold; font-size: 19px; margin-bottom: 5px; }
-        .fecha { margin-bottom: 35px; }
         
-        .datos-cliente { margin-bottom: 25px; font-weight: bold; }
+        .header-container {
+            width: 100%;
+            margin-bottom: 20px;
+            display: table;
+        }
+        .header-left { display: table-cell; vertical-align: middle; }
+        .header-right { display: table-cell; text-align: right; vertical-align: middle; width: 250px; }
+
+        .header-title { font-weight: bold; font-size: 19px; }
+        .fecha { margin-top: 5px; }
+
+        .ruc-box {
+            border: 2px solid #000;
+            text-align: center;
+            padding: 0;
+        }
+        .ruc-text { padding: 5px; font-weight: bold; font-size: 15px; }
+        .cotizacion-label { 
+            background-color: #555; 
+            color: #fff; 
+            font-weight: bold; 
+            padding: 5px;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+        }
+        .numero-cot { padding: 5px; font-weight: bold; font-size: 16px; }
+        
+        .datos-cliente { margin-bottom: 20px; font-weight: bold; margin-top: 20px; }
         .dato-fila { margin-bottom: 3px; }
 
+        /* --- INTRODUCCIÓN CORREGIDA --- */
         .introduccion { margin-bottom: 20px; }
-        .introduccion p { margin: 0; }
+        .introduccion .block { display: block; margin-bottom: 2px; } /* Usamos clase para forzar saltos */
 
-        table { 
+        table.items-table { 
             width: 100%; 
             border-collapse: collapse; 
             border: 2px solid #000;
         }
-        th { 
+        table.items-table th { 
             border: 2px solid #000; 
             padding: 10px; 
             text-align: center;
             font-weight: bold;
         }
-        td { 
+        table.items-table td { 
             border: 2px solid #000; 
             padding: 12px 8px; 
-            text-align: center;
+            text-align: center; /* V. VENTA centrado */
         }
-        .text-left { text-align: left; padding-left: 15px; }
-
-        .fila-final { font-weight: bold; }
-        .label-total { text-align: right; padding-right: 15px; }
-
-        .terminos { margin-top: 40px; }
-        .terminos-title { font-weight: bold; margin-bottom: 8px; }
+        .text-left { text-align: left !important; padding-left: 15px !important; }
+        
+        /* --- ESTILOS TOTALES CORREGIDOS --- */
+        .fila-final td { font-weight: bold; }
+        .label-total-pegada { 
+            text-align: right !important; /* Alineado a la derecha */
+            padding-right: 5px !important; /* Pegado a la casilla del número */
+        }
+        .celda-monto {
+            text-align: center !important; /* Número en el medio */
+            width: 20%;
+        }
     </style>
 </head>
 <body>
-    <div class="header-title">GRASS DOÑA ALCIRA</div>
-    <div class="fecha">
-        <%= new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %>
+    <div class="header-container">
+        <div class="header-left">
+            <div class="header-title">GRASS DOÑA ALCIRA</div>
+            <div class="fecha">
+                <%= new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="ruc-box">
+                <div class="ruc-text">RUC 10450307501</div>
+                <div class="cotizacion-label">COTIZACION</div>
+                <div class="numero-cot">N° <%= datos.numeroCorrelativo %></div>
+            </div>
+        </div>
     </div>
 
     <div class="datos-cliente">
@@ -58,12 +100,13 @@
     </div>
 
     <div class="introduccion">
-        <p>Estimados Señores:</p>
-        <p>Me es grato dirigirme a usted, a fin de hacerle llegar a continuación la cotización de acuerdo</p>
-        <p>al siguiente detalle:</p>
+        <span class="block">Estimados Señores:</span>
+        <span class="block">Me es grato dirigirme a usted, a fin de hacerle llegar</span>
+        <span class="block">a continuación la cotización de acuerdo</span>
+        <span class="block">al siguiente detalle:</span>
     </div>
 
-    <table>
+    <table class="items-table">
         <thead>
             <tr>
                 <th style="width: 8%;">ITEM</th>
@@ -80,26 +123,39 @@
                 <td><%= item.um %></td>
                 <td><%= item.cantidad %></td>
                 <td class="text-left"><%= item.descripcion %></td>
-                <td><%= item.precio %></td>
-            </tr>
+                <td><%= item.precio %></td> </tr>
             <% }); %>
             
             <tr class="fila-final">
-                <td colspan="4" class="label-total">VALOR DE VENTA S/:</td>
-                <td><%= datos.total %></td>
-            </tr>
+                <td colspan="4" class="label-total-pegada">VALOR DE VENTA S/:</td>
+                <td class="celda-monto"><%= datos.valorVentaCalculado %></td> </tr>
             <tr class="fila-final">
-                <td colspan="4" class="label-total">TOTAL, S/</td>
-                <td><%= datos.total %></td>
-            </tr>
+                <td colspan="4" class="label-total-pegada">IGV (18%) S/:</td>
+                <td class="celda-monto"><%= datos.igvCalculado %></td> </tr>
+            <tr class="fila-final">
+                <td colspan="4" class="label-total-pegada">TOTAL, S/</td>
+                <td class="celda-monto" style="background-color: #eee;"><%= datos.totalCalculado %></td> </tr>
         </tbody>
     </table>
 
-    <div class="terminos">
-        <div class="terminos-title">Términos y condiciones:</div>
+    <div class="footer-section" style="margin-top: 30px;">
+        <div style="font-weight: bold; margin-bottom: 5px;">Términos y condiciones:</div>
         <div>1. El cliente debe de depositar el 50% al momento de aceptar la cotización.</div>
         <div>2. El pago del 50% faltante se pagará al momento de la entrega</div>
         <div>3. Validez de la oferta: 15 días</div>
+
+        <div style="margin-top: 20px;">
+            <div style="font-weight: bold;">DEPOSITO A CUENTA</div>
+            <div>BCP SOLES N° : 570-04650808-0-40</div>
+            <div>CCI N°: 00257010465080804007</div>
+        </div>
+
+        <div style="margin-top: 35px; font-weight: bold;">
+            <div>Atentamente:</div>
+            <br>
+            <div>Alcira Infantes García</div>
+            <div>Cel.: 946 309 886</div>
+        </div>
     </div>
 </body>
 </html>

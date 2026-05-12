@@ -3,9 +3,9 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const ejs = require('ejs');
 const pdf = require('html-pdf-node');
+const fs = require('fs');
 
 const app = express();
-// CAMBIO 1: Render usa puertos dinámicos, esto permite que funcione en la nube o local
 const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
@@ -18,27 +18,41 @@ app.get('/', (req, res) => {
 
 app.post('/guardar', (req, res) => {
     const datos = req.body;
+    const contadorPath = path.join(__dirname, 'contador.json');
+
+    let contadorData = { ultimoNumero: 234 }; 
+    if (fs.existsSync(contadorPath)) {
+        contadorData = JSON.parse(fs.readFileSync(contadorPath, 'utf-8'));
+    }
+    contadorData.ultimoNumero += 1;
+    const numeroReal = contadorData.ultimoNumero; // Número para el header
+    const numeroFormateado = String(numeroReal).padStart(8, '0');
+    datos.numeroCorrelativo = `0001- ${numeroFormateado}`;
+    fs.writeFileSync(contadorPath, JSON.stringify(contadorData));
+
+    // Lógica de Impuestos
+    const valorVenta = parseFloat(datos.total) || 0;
+    const igv = valorVenta * 0.18;
+    const totalFinal = valorVenta + igv;
+
+    datos.valorVentaCalculado = valorVenta.toFixed(2);
+    datos.igvCalculado = igv.toFixed(2);
+    datos.totalCalculado = totalFinal.toFixed(2);
 
     ejs.renderFile(path.join(__dirname, 'views', 'plantilla-pdf.ejs'), { datos }, (err, html) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send("Error al procesar el diseño");
-        }
+        if (err) return res.status(500).send("Error en el diseño");
 
-        // CAMBIO 2: Agregamos args para que Chromium corra sin problemas en servidores Linux como Render
         let options = { 
             format: 'A4',
             args: ['--no-sandbox', '--disable-setuid-sandbox'] 
         };
-        let file = { content: html };
 
-        pdf.generatePdf(file, options).then(pdfBuffer => {
+        pdf.generatePdf({ content: html }, options).then(pdfBuffer => {
+            // AGREGADO: Enviar el número real en el header para sincronizar con el nombre del archivo
+            res.setHeader('X-Numero-Cotizacion', numeroReal);
             res.contentType("application/pdf");
             res.send(pdfBuffer); 
-        }).catch(error => {
-            console.error(error);
-            res.status(500).send("Error al generar PDF");
-        });
+        }).catch(err => res.status(500).send("Error al generar PDF"));
     });
 });
 
