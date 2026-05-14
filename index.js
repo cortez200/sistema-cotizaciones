@@ -21,14 +21,18 @@ app.post('/guardar', (req, res) => {
     const datos = req.body;
     const contadorPath = path.join(__dirname, 'contador.json');
 
-    let contadorData = { ultimoNumero: 234 }; 
+    // ACTUALIZADO: El contador ahora inicia en 425 por defecto
+    let contadorData = { ultimoNumero: 425 }; 
     if (fs.existsSync(contadorPath)) {
         contadorData = JSON.parse(fs.readFileSync(contadorPath, 'utf-8'));
     }
+
     contadorData.ultimoNumero += 1;
     const numeroReal = contadorData.ultimoNumero; 
     const numeroFormateado = String(numeroReal).padStart(8, '0');
     datos.numeroCorrelativo = `0001- ${numeroFormateado}`;
+    
+    // Guardamos el progreso en el archivo JSON
     fs.writeFileSync(contadorPath, JSON.stringify(contadorData));
 
     // Lógica de Impuestos
@@ -58,6 +62,7 @@ app.post('/guardar', (req, res) => {
         };
 
         pdf.generatePdf({ content: html }, options).then(pdfBuffer => {
+            // Enviamos el número real en el header para que el archivo se llame Cotizacion_426.pdf
             res.setHeader('X-Numero-Cotizacion', numeroReal);
             res.contentType("application/pdf");
             res.send(pdfBuffer); 
